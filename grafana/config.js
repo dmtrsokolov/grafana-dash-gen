@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 'use strict';
-var xtend = require('xtend');
+const xtend = require('xtend');
 
 /**
  * `user` - Auth user, defaults to "guest"
@@ -27,11 +27,9 @@ var xtend = require('xtend');
  * `url` - Full URL to grafana's elasticsearch endpoint
  * `cookie` - Key/value pair for auth, defaults to"auth-openid="
  */
-var configurations = {
-    user: 'guest',
-    group: 'guest',
+let configurations = {
     url: 'https://your.graphite.url.com/elasticsearch/grafana-dash/dashboard/',
-    cookie: 'auth-openid='
+    token: 'Bearer '
 };
 
 function configure(opts) {

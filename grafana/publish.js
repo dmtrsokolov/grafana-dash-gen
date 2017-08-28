@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 
 'use strict';
-var request = require('request');
-var config = require('./config');
-var errors = require('./errors');
+let request = require('request');
+let config = require('./config');
+let errors = require('./errors');
 
 /* eslint-disable max-statements, max-len, no-console, no-undef */
 function publish(dashboard, opts) {
@@ -34,8 +34,8 @@ function publish(dashboard, opts) {
         });
     }
 
-    var state = dashboard.state;
-    var cfg = config.getConfig();
+    let state = dashboard.state;
+    const cfg = config.getConfig();
 
     if (!state || !state.title) {
         throw errors.InvalidState({
@@ -53,27 +53,30 @@ function publish(dashboard, opts) {
         });
     }
 
-    if (!cfg.cookie) {
+    if (!cfg.token) {
         throw errors.Misconfigured({
-            invalidArg: 'cookie',
+            invalidArg: 'token',
             reason: 'undefined'
         });
     }
 
-    var createData = {
+    const createData = {
         dashboard: dashboard.generate(),
         overwrite: true
     };
 
-    var j = request.jar();
-    var cookie = request.cookie(cfg.cookie);
-    j.setCookie(cookie, cfg.url);
+    const j = request.jar();
 
     request({
         url: cfg.url,
         method: 'POST',
         json: createData,
         jar: j,
+        headers: {
+            'Authorization': 'Bearer ' + cfg.token,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
         timeout: opts.timeout || 1000
     }, function createResponseHandler(createErr, createResp) {
         if (createErr) {

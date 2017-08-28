@@ -19,33 +19,33 @@
 // THE SOFTWARE.
 
 'use strict';
-var nock = require('nock');
-var test = require('tape');
-var config = require('../grafana/config');
-var publish = require('../grafana/publish');
-var Dashboard = require('../grafana/dashboard');
+const nock = require('nock');
+const test = require('tape');
+const config = require('../grafana/config');
+const publish = require('../grafana/publish');
+const Dashboard = require('../grafana/dashboard');
 
 // configuration values, held constant for assertions
-var baseUrl = 'http://awesome.com';
-var url = [baseUrl, 'dashboard'].join('/');
-var cookie = 'auth=foo';
-var title = 'Test Dashboard';
-var tags = ['tag1', 'tag2'];
-var refresh = '1m';
-var templateVar1 = {
+const baseUrl = 'http://awesome.com';
+const url = [baseUrl, 'dashboard'].join('/');
+const token = 'Bearer fakeToken';
+const title = 'Test Dashboard';
+const tags = ['tag1', 'tag2'];
+const refresh = '1m';
+const templateVar1 = {
     name: 'myVar1',
     options: ['a', 'b']
 };
-var templateVar2 = {
+const templateVar2 = {
     name: 'marVar2',
     options: [0, 1, 2, 3, 4]
 };
-var annotation1 = {
+const annotation1 = {
     name: 'myAnnotation1',
     target: 'my.annotation.target.1'
 };
 
-var dashboard = new Dashboard({
+const dashboard = new Dashboard({
     title: title,
     tags: tags,
     refresh: refresh,
@@ -82,7 +82,7 @@ test('Publish dashboard - invalid title', function t(assert) {
 test('Publish dashboard - misconfigured url', function t(assert) {
     assert.throws(function assertThrows() {
         config.configure({
-            cookie: cookie,
+            token: token,
             url: null
         });
         publish({
@@ -94,10 +94,10 @@ test('Publish dashboard - misconfigured url', function t(assert) {
     assert.end();
 });
 
-test('Publish dashboard - misconfigured cookie', function t(assert) {
+test('Publish dashboard - misconfigured token', function t(assert) {
     assert.throws(function assertThrows() {
         config.configure({
-            cookie: null,
+            token: null,
             url: url
         });
         publish({
@@ -111,7 +111,7 @@ test('Publish dashboard - misconfigured cookie', function t(assert) {
 
 test('Publish dashboard - client error', function t(assert) {
     config.configure({
-        cookie: cookie,
+        token: token,
         url: url
     });
     nock(baseUrl)
@@ -126,7 +126,7 @@ test('Publish dashboard - client error', function t(assert) {
 
 test('Publish dashboard - client error (invalid)', function t(assert) {
     config.configure({
-        cookie: cookie,
+        token: token,
         url: url
     });
     nock(baseUrl)
@@ -138,7 +138,7 @@ test('Publish dashboard - client error (invalid)', function t(assert) {
 
 test('Publish dashboard - client error (n/a)', function t(assert) {
     config.configure({
-        cookie: cookie,
+        token: token,
         url: url
     });
     nock(baseUrl)
@@ -150,7 +150,7 @@ test('Publish dashboard - client error (n/a)', function t(assert) {
 
 test('Publish dashboard - bad response', function t(assert) {
     config.configure({
-        cookie: cookie,
+        token: token,
         url: url
     });
     nock(baseUrl)
@@ -162,7 +162,7 @@ test('Publish dashboard - bad response', function t(assert) {
 
 test('Publish dashboard - server unavailable', function t(assert) {
     config.configure({
-        cookie: cookie,
+        token: token,
         url: 'http://111.111.111.111'
     });
     publish(dashboard);
@@ -171,7 +171,7 @@ test('Publish dashboard - server unavailable', function t(assert) {
 
 test('Publish dashboard - server error', function t(assert) {
     config.configure({
-        cookie: cookie,
+        token: token,
         url: url
     });
     nock(baseUrl)
@@ -183,10 +183,10 @@ test('Publish dashboard - server error', function t(assert) {
 
 test('Publish dashboard - success', function t(assert) {
     config.configure({
-        cookie: cookie,
+        token: token,
         url: url
     });
-    var expectedBody = {
+    const expectedBody = {
         dashboard: dashboard.generate(),
         overwrite: true
     };
@@ -196,12 +196,12 @@ test('Publish dashboard - success', function t(assert) {
     nock(baseUrl)
         .post('/dashboard')
         .reply(201, function createdHandler(uri, requestBody) {
-            var body = JSON.parse(requestBody);
+            const body = JSON.parse(requestBody);
             assert.deepEqual(body, expectedBody);
         })
         .post('/dashboard')
         .reply(200, function okHandler(uri, requestBody) {
-            var body = JSON.parse(requestBody);
+            const body = JSON.parse(requestBody);
             assert.deepEqual(body, expectedBody);
             assert.end();
         });
@@ -211,10 +211,10 @@ test('Publish dashboard - success', function t(assert) {
 
 test('Publish dashboard - success w/ custom timeout', function t(assert) {
     config.configure({
-        cookie: cookie,
+        token: token,
         url: url
     });
-    var expectedBody = {
+    const expectedBody = {
         dashboard: dashboard.generate(),
         overwrite: true
     };
@@ -224,12 +224,12 @@ test('Publish dashboard - success w/ custom timeout', function t(assert) {
     nock(baseUrl)
         .post('/dashboard')
         .reply(201, function createdHandler(uri, requestBody) {
-            var body = JSON.parse(requestBody);
+            const body = JSON.parse(requestBody);
             assert.deepEqual(body, expectedBody);
         })
         .post('/dashboard')
         .reply(200, function okHandler(uri, requestBody) {
-            var body = JSON.parse(requestBody);
+            const body = JSON.parse(requestBody);
             assert.deepEqual(body, expectedBody);
             assert.end();
         });

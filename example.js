@@ -1,10 +1,10 @@
 'use strict';
 
-var grafana = require('./index');
-var Row = grafana.Row;
-var Dashboard = grafana.Dashboard;
-var Panels = grafana.Panels;
-var Target = grafana.Target;
+const grafana = require('./index');
+const Row = grafana.Row;
+const Dashboard = grafana.Dashboard;
+const Panels = grafana.Panels;
+const Target = grafana.Target;
 
 // For grafana v1, the URL should look something like:
 //
@@ -17,104 +17,82 @@ var Target = grafana.Target;
 //   https://your.grafanahost.com/grafana2/api/dashboards/db/
 
 grafana.configure({
-    url: 'https://your.grafanahost.com/grafana2/api/dashboards/db/',
-    cookie: 'auth-openid=REPLACETOKENIFAPPLICABLE'
+    url: 'https://put_your_dashbord_url/api/dashboards/db',
+    token: 'put_token_here'
 });
 
 // Dashboard Constants
-var TITLE = 'TEST API dashboard';
-var TAGS = ['myapp', 'platform'];
-var TEMPLATING = [{
+const TITLE = 'TEST API dashboard';
+const TAGS = ['myapp', 'platform'];
+const TEMPLATING = [{
     name: 'dc',
     options: ['dc1', 'dc2']
 }, {
     name: 'smoothing',
     options: ['30min', '10min', '5min', '2min', '1min']
 }];
-var ANNOTATIONS = [{
+const ANNOTATIONS = [{
     name: 'Deploy',
     target: 'stats.$dc.production.deploy'
 }];
-var REFRESH = '1m';
+const REFRESH = '1m';
 
 // Target prefixes
-var SERVER_PREFIX = 'servers.app*-$dc.myapp.';
-var COUNT_PREFIX = 'stats.$dc.counts.myapp.';
+const SERVER_PREFIX = 'servers.app*-$dc.myapp.';
+const COUNT_PREFIX = 'stats.$dc.counts.myapp.';
 
 function generateDashboard() {
     // Rows
-    var volumeRow = new Row({
+    const volumeRow = new Row({
         title: 'Request Volume'
     });
-    var systemRow = new Row({
+    const systemRow = new Row({
         title: 'System / OS'
     });
 
     // Panels: request volume
-    var rpsGraphPanel = new Panels.Graph({
+    const rpsGraphPanel = new Panels.Graph({
         title: 'req/sec',
         span: 8,
         targets: [
-            new Target(COUNT_PREFIX + 'statusCode.*').
-                        transformNull(0).
-                        sum().
-                        hitcount('1seconds').
-                        scale(0.1).
-                        alias('rps')
+            new Target(COUNT_PREFIX + 'statusCode.*').transformNull(0).sum().hitcount('1seconds').scale(0.1).alias('rps')
         ]
     });
-    var rpsStatPanel = new Panels.SingleStat({
+    const rpsStatPanel = new Panels.SingleStat({
         title: 'Current Request Volume',
         postfix: 'req/sec',
         span: 4,
         targets: [
-            new Target(COUNT_PREFIX + 'statusCode.*').
-                    sum().
-                    scale(0.1)
+            new Target(COUNT_PREFIX + 'statusCode.*').sum().scale(0.1)
         ]
     });
 
     // Panels: system health
-    var cpuGraph = new Panels.Graph({
+    const cpuGraph = new Panels.Graph({
         title: 'CPU',
         span: 4,
         targets: [
-            new Target(SERVER_PREFIX + 'cpu.user').
-                nonNegativeDerivative().
-                scale(1 / 60).
-                scale(100).
-                averageSeries().
-                alias('avg'),
-            new Target(SERVER_PREFIX + 'cpu.user').
-                nonNegativeDerivative().
-                scale(1 / 60).
-                scale(100).
-                percentileOfSeries(95, false).
-                alias('p95')
+            new Target(SERVER_PREFIX + 'cpu.user').nonNegativeDerivative().scale(1 / 60).scale(100).averageSeries().alias('avg'),
+            new Target(SERVER_PREFIX + 'cpu.user').nonNegativeDerivative().scale(1 / 60).scale(100).percentileOfSeries(95, false).alias('p95')
         ]
     });
-    var rssGraph = new Panels.Graph({
+    const rssGraph = new Panels.Graph({
         title: 'Memory',
         span: 4,
         targets: [
-            new Target(SERVER_PREFIX + 'memory.rss').
-                averageSeries().
-                alias('rss')
+            new Target(SERVER_PREFIX + 'memory.rss').averageSeries().alias('rss')
         ]
     });
-    var fdsGraph = new Panels.Graph({
+    const fdsGraph = new Panels.Graph({
         title: 'FDs',
         span: 4,
         targets: [
-            new Target(SERVER_PREFIX + 'fds').
-                averageSeries().
-                movingAverage('10min').
-                alias('moving avg')
+            new Target(SERVER_PREFIX + 'fds').averageSeries().movingAverage('10min').alias('moving avg')
         ]
     });
 
     // Dashboard
-    var dashboard = new Dashboard({
+    const dashboard = new Dashboard({
         title: TITLE,
         tags: TAGS,
         templating: TEMPLATING,
